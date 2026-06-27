@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "twemoji_font_forge"
+version = "1.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "fonttools>=4.63,<5",
+    "nanoemoji>=0.15.9,<1",
+    "tqdm>=4.68.3,<5",
+    "typer>=0.26.8,<1",
+]
+
+[project.scripts]
+twemoji_font_forge = "twemoji_font_forge:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+twemoji_font_forge = ["templates/*.tpl"]

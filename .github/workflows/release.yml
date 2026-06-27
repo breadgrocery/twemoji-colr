@@ -1,0 +1,85 @@
+name: release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: Twemoji repo (owner/name).
+        type: string
+        default: jdecked/twemoji
+      tag:
+        description: Twemoji tag (empty means latest).
+        type: string
+        default: ""
+      output:
+        description: Output directory.
+        type: string
+        default: dist
+      workdir:
+        description: Work directory.
+        type: string
+        default: .build
+      force:
+        description: Force rebuild if output exists.
+        type: boolean
+        default: false
+
+  schedule:
+    - cron: "30 23 * * *"
+
+env:
+  REPO: ${{ inputs.repo || 'jdecked/twemoji' }}
+  TAG: ${{ inputs.tag }}
+  OUTPUT: ${{ inputs.output || 'dist' }}
+  WORKDIR: ${{ inputs.workdir || '.build' }}
+  FORCE: ${{ inputs.force }}
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Resolve Twemoji tag
+        id: resolve
+        run: |
+          if [ -z "$TAG" ]; then
+            TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/tags" | jq -r '.[0].name')
+          fi
+
+          echo "repo=$REPO" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39
+        with:
+          python-version: "3.14"
+          enable-cache: true
+
+      - run: uv sync --locked
+
+      - name: Build font
+        env:
+          TWEMOJI_REPO: ${{ steps.resolve.outputs.repo }}
+          TWEMOJI_TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          uv run python -m twemoji_font_forge \
+            --repo "$TWEMOJI_REPO" \
+            --tag "$TWEMOJI_TAG" \
+            --output "$OUTPUT" \
+            --workdir "$WORKDIR" \
+            ${{ env.FORCE == 'true' && '--force' || '' }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: twemoji-font
+          path: ${{ env.OUTPUT }}/**/*.ttf
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.resolve.outputs.tag }}
+          name: Twemoji ${{ steps.resolve.outputs.tag }}
+          files: ${{ env.OUTPUT }}/**/*
+          overwrite_files: true
