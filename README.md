@@ -1,21 +1,21 @@
 # twemoji-colr
 
-Project to create a COLR/CPAL-based color OpenType font
-from the [Twemoji](https://github.com/jdecked/twemoji) collection of emoji images.
+Build a COLR/CPAL color OpenType font from the [Twemoji](https://github.com/jdecked/twemoji) emoji image collection.
 
-Note that the resulting font will **only** be useful on systems that support
-layered color TrueType fonts; this includes Windows 8.1 and later,
-as well as Mozilla Firefox and other Gecko-based applications running on
-any platform.
+This project currently provides **COLR/CPAL v0 only**.
 
-Systems that do not support such color fonts will show blank glyphs
-if they try to use this font.
+The resulting font is usable only on systems that support layered color TrueType fonts, such as Windows 8.1 and later, plus Firefox and other Gecko-based applications.
+
+| COLR/CPAL | Windows                                                    | Chrome / Blink | Firefox / Gecko | Safari / WebKit |
+| :-------: | :--------------------------------------------------------- | :------------: | :-------------: | :-------------: |
+|    v0     | Windows 8.1 6.3.9600.16384                                 |       71       |       32        |       11        |
+|    v1     | Windows 11 22H2 22621.2715<br />Windows 11 23H2 22631.2715 |       98       |       107       |                 |
+
+Systems without compatible color-font support may display blank glyphs.
 
 ## Getting started
 
-This project is now a Python CLI tool built on top of
-[nanoemoji](https://github.com/googlefonts/nanoemoji) and
-[fonttools](https://github.com/fonttools/fonttools).
+This repository is a Python CLI tool built on top of [nanoemoji](https://github.com/googlefonts/nanoemoji) and [fonttools](https://github.com/fonttools/fonttools).
 
 Requirements:
 
@@ -30,19 +30,19 @@ uv sync --locked
 
 ## Build
 
-Build with the latest Twemoji tag:
+Build from the latest Twemoji tag:
 
 ```bash
 uv run python -m twemoji_font_forge
 ```
 
-Build a specific tag:
+Build from a specific tag:
 
 ```bash
 uv run python -m twemoji_font_forge --tag v14.0.0
 ```
 
-Force rebuild even if output exists:
+Force a rebuild even if outputs already exist:
 
 ```bash
 uv run python -m twemoji_font_forge --tag v14.0.0 --force
@@ -73,5 +73,5 @@ For a given tag (for example `v14.0.0`), outputs are written to:
 - `dist/v14.0.0/Twemoji.ttf`
 - `dist/v14.0.0/preview.html`
 
-The generated font version is derived from the tag with the `v` prefix removed.
+The generated font version is derived from the tag after removing the `v` prefix.
 For example, `v14.0.0` becomes font version `14.0`.
